@@ -164,7 +164,6 @@ export async function getTopProductFamilies(
       AND sdl.NetAmountVatExcluded > 0
       ${customerId ? 'AND sd.CustomerId = @customerId' : ''}
     GROUP BY f.Id, f.Caption
-    ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
   `;
   
   const request = pool.request()
@@ -176,7 +175,10 @@ export async function getTopProductFamilies(
     request.input('customerId', customerId);
   }
   
-  const result = await request.query(`SELECT TOP (@limit) * FROM (${baseQuery}) as families`);
+  const result = await request.query(`
+    SELECT TOP (@limit) * FROM (${baseQuery}) as families 
+    ORDER BY families.TotalRevenue DESC
+  `);
   
   const totalRevenue = result.recordset.reduce((sum, row) => sum + (row.TotalRevenue || 0), 0);
   
