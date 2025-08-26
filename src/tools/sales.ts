@@ -1,28 +1,28 @@
 // Tools pour les ventes et chiffre d'affaires
 import { getPool } from '../database.js';
+import { PredefinedPeriod, calculatePeriodDates } from '../utils/periods.js';
+import { getClientProductFamilies, ProductFamily } from '../utils/families-helper.js';
 
 export interface ClientSalesParams {
   customerId: string;
-  year?: number;
-  includeDetails?: boolean;
+  period?: PredefinedPeriod;
+  startDate?: string;
+  endDate?: string;
+  includeProductFamilies?: boolean;
+  includeMonthlyTrend?: boolean;
 }
 
 export interface ClientSalesResult {
   customerId: string;
   customerName: string;
-  year: number;
+  period: string;
   totalRevenue: number;
   totalOrders: number;
   averageOrderValue: number;
   lastOrderDate?: Date;
-  topProducts?: Array<{
-    itemId: string;
-    itemName: string;
-    quantity: number;
-    revenue: number;
-  }>;
-  monthlyRevenue?: Array<{
-    month: number;
+  productFamilies?: ProductFamily[];
+  monthlyTrend?: Array<{
+    month: string;
     revenue: number;
     orders: number;
   }>;
@@ -30,13 +30,16 @@ export interface ClientSalesResult {
 
 export async function getClientSales(params: ClientSalesParams): Promise<ClientSalesResult> {
   const pool = getPool();
-  const year = params.year || new Date().getFullYear();
+  
+  // Calculer les dates de la période
+  const period = params.period || 'year';
+  const { startDate, endDate, label } = calculatePeriodDates(period, params.startDate, params.endDate);
   
   // Requête principale pour le CA
   const salesResult = await pool.request()
     .input('customerId', params.customerId)
-    .input('yearStart', `${year}-01-01`)
-    .input('yearEnd', `${year}-12-31`)
+    .input('startDate', startDate)
+    .input('endDate', endDate)
     .query(`
       SELECT 
         c.Id as CustomerId,
@@ -46,8 +49,8 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
         MAX(sd.DocumentDate) as LastOrderDate
       FROM Customer c
       LEFT JOIN SaleDocument sd ON c.Id = sd.CustomerId
-        AND sd.DocumentDate >= @yearStart 
-        AND sd.DocumentDate <= @yearEnd
+        AND sd.DocumentDate >= @startDate 
+        AND sd.DocumentDate <= @endDate
         AND sd.DocumentType IN (6, 7) -- Factures et Avoirs
       WHERE c.Id = @customerId
       GROUP BY c.Id, c.Name
@@ -61,66 +64,45 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
   const result: ClientSalesResult = {
     customerId: mainData.CustomerId,
     customerName: mainData.CustomerName,
-    year,
+    period: label,
     totalRevenue: mainData.TotalRevenue || 0,
     totalOrders: mainData.TotalOrders || 0,
-    averageOrderValue: mainData.TotalRevenue ? mainData.TotalRevenue / mainData.TotalOrders : 0,
+    averageOrderValue: mainData.TotalRevenue ? Math.round((mainData.TotalRevenue / mainData.TotalOrders) * 100) / 100 : 0,
     lastOrderDate: mainData.LastOrderDate
   };
   
-  // Si détails demandés, récupérer produits et évolution mensuelle
-  if (params.includeDetails) {
-    // Top produits vendus
-    const productsResult = await pool.request()
-      .input('customerId', params.customerId)
-      .input('yearStart', `${year}-01-01`)
-      .input('yearEnd', `${year}-12-31`)
-      .query(`
-        SELECT TOP 10
-          sdl.ItemId,
-          i.Caption as ItemName,
-          SUM(sdl.Quantity) as TotalQuantity,
-          SUM(sdl.NetAmountVatExcluded) as TotalRevenue
-        FROM SaleDocumentLine sdl
-        INNER JOIN SaleDocument sd ON sdl.DocumentId = sd.Id
-        LEFT JOIN Item i ON sdl.ItemId = i.Id
-        WHERE sd.CustomerId = @customerId
-          AND sd.DocumentDate >= @yearStart
-          AND sd.DocumentDate <= @yearEnd
-          AND sd.DocumentType IN (6, 7)
-          AND sdl.ItemId IS NOT NULL
-        GROUP BY sdl.ItemId, i.Caption
-        ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
-      `);
-    
-    result.topProducts = productsResult.recordset.map(row => ({
-      itemId: row.ItemId,
-      itemName: row.ItemName || 'Article non référencé',
-      quantity: row.TotalQuantity,
-      revenue: row.TotalRevenue
-    }));
-    
-    // Evolution mensuelle
+  // Ajouter les familles de produits si demandé
+  if (params.includeProductFamilies) {
+    result.productFamilies = await getClientProductFamilies(
+      params.customerId,
+      startDate,
+      endDate,
+      true // inclure les sous-familles
+    );
+  }
+  
+  // Ajouter l'évolution mensuelle si demandé
+  if (params.includeMonthlyTrend) {
     const monthlyResult = await pool.request()
       .input('customerId', params.customerId)
-      .input('yearStart', `${year}-01-01`)
-      .input('yearEnd', `${year}-12-31`)
+      .input('startDate', startDate)
+      .input('endDate', endDate)
       .query(`
         SELECT 
-          MONTH(sd.DocumentDate) as Month,
+          FORMAT(sd.DocumentDate, 'yyyy-MM') as MonthYear,
           COUNT(DISTINCT sd.Id) as Orders,
           SUM(sd.AmountVatExcludedWithDiscount) as Revenue
         FROM SaleDocument sd
         WHERE sd.CustomerId = @customerId
-          AND sd.DocumentDate >= @yearStart
-          AND sd.DocumentDate <= @yearEnd
+          AND sd.DocumentDate >= @startDate
+          AND sd.DocumentDate <= @endDate
           AND sd.DocumentType IN (6, 7)
-        GROUP BY MONTH(sd.DocumentDate)
-        ORDER BY MONTH(sd.DocumentDate)
+        GROUP BY FORMAT(sd.DocumentDate, 'yyyy-MM')
+        ORDER BY FORMAT(sd.DocumentDate, 'yyyy-MM')
       `);
     
-    result.monthlyRevenue = monthlyResult.recordset.map(row => ({
-      month: row.Month,
+    result.monthlyTrend = monthlyResult.recordset.map(row => ({
+      month: row.MonthYear,
       revenue: row.Revenue || 0,
       orders: row.Orders || 0
     }));
