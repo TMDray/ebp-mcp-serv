@@ -74,7 +74,8 @@ export async function getProductFamiliesPerformance(
     LEFT JOIN ItemFamily f ON i.FamilyId = f.Id
     WHERE sd.DocumentDate >= @startDate
       AND sd.DocumentDate <= @endDate
-      AND sd.DocumentType IN (6, 7)  -- Factures et Avoirs
+      AND sd.DocumentType IN (2, 3)  -- Factures et Avoirs (Types corrects)
+      AND sd.ValidationState = 3  -- Seulement les documents comptabilisés
       AND sdl.NetAmountVatExcluded > 0
   `;
   
@@ -138,7 +139,8 @@ export async function getProductFamiliesPerformance(
           WHERE i.FamilyId = @familyId
             AND sd.DocumentDate >= @startDate
             AND sd.DocumentDate <= @endDate
-            AND sd.DocumentType IN (6, 7)
+            AND sd.DocumentType IN (2, 3)
+            AND sd.ValidationState = 3
           GROUP BY sd.CustomerId, sd.CustomerName
           ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
         `);
@@ -171,7 +173,8 @@ export async function getProductFamiliesPerformance(
           WHERE i.FamilyId = @familyId
             AND sd.DocumentDate >= @startDate
             AND sd.DocumentDate <= @endDate
-            AND sd.DocumentType IN (6, 7)
+            AND sd.DocumentType IN (2, 3)
+            AND sd.ValidationState = 3
             AND sdl.NetAmountVatExcluded > 0
           GROUP BY sf.Id, sf.Caption
           ORDER BY SUM(sdl.NetAmountVatExcluded) DESC

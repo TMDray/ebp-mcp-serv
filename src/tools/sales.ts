@@ -51,7 +51,8 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
       LEFT JOIN SaleDocument sd ON c.Id = sd.CustomerId
         AND sd.DocumentDate >= @startDate 
         AND sd.DocumentDate <= @endDate
-        AND sd.DocumentType IN (6, 7) -- Factures et Avoirs
+        AND sd.DocumentType IN (2, 3) -- Factures et Avoirs (Types corrects)
+        AND sd.ValidationState = 3 -- Seulement les documents comptabilisés
       WHERE c.Id = @customerId
       GROUP BY c.Id, c.Name
     `);
@@ -96,7 +97,8 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
         WHERE sd.CustomerId = @customerId
           AND sd.DocumentDate >= @startDate
           AND sd.DocumentDate <= @endDate
-          AND sd.DocumentType IN (6, 7)
+          AND sd.DocumentType IN (2, 3)
+          AND sd.ValidationState = 3
         GROUP BY FORMAT(sd.DocumentDate, 'yyyy-MM')
         ORDER BY FORMAT(sd.DocumentDate, 'yyyy-MM')
       `);
@@ -166,7 +168,8 @@ export async function getTopProducts(params: TopProductsParams): Promise<TopProd
     LEFT JOIN Item i ON sdl.ItemId = i.Id
     WHERE sd.CustomerId = @customerId
       AND sd.DocumentDate >= @startDate
-      AND sd.DocumentType IN (6, 7)
+      AND sd.DocumentType IN (2, 3)
+      AND sd.ValidationState = 3
       AND sdl.ItemId IS NOT NULL
     GROUP BY sdl.ItemId, i.Caption
     ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
@@ -182,7 +185,8 @@ export async function getTopProducts(params: TopProductsParams): Promise<TopProd
     INNER JOIN SaleDocument sd ON sdl.DocumentId = sd.Id
     LEFT JOIN Item i ON sdl.ItemId = i.Id
     WHERE sd.DocumentDate >= @startDate
-      AND sd.DocumentType IN (6, 7)
+      AND sd.DocumentType IN (2, 3)
+      AND sd.ValidationState = 3
       AND sdl.ItemId IS NOT NULL
     GROUP BY sdl.ItemId, i.Caption
     ORDER BY SUM(sdl.NetAmountVatExcluded) DESC

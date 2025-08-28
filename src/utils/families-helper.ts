@@ -47,7 +47,8 @@ export async function getClientProductFamilies(
     WHERE sd.CustomerId = @customerId
       AND sd.DocumentDate >= @startDate
       AND sd.DocumentDate <= @endDate
-      AND sd.DocumentType IN (6, 7)  -- Factures et Avoirs
+      AND sd.DocumentType IN (2, 3)  -- Factures et Avoirs (Types corrects)
+      AND sd.ValidationState = 3  -- Seulement les documents comptabilisés
       AND sdl.NetAmountVatExcluded > 0
     GROUP BY f.Id, f.Caption
     ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
@@ -107,7 +108,8 @@ async function getClientProductSubFamilies(
     WHERE sd.CustomerId = @customerId
       AND sd.DocumentDate >= @startDate
       AND sd.DocumentDate <= @endDate
-      AND sd.DocumentType IN (6, 7)
+      AND sd.DocumentType IN (2, 3)
+      AND sd.ValidationState = 3
       AND i.FamilyId = @familyId
       AND sdl.NetAmountVatExcluded > 0
     GROUP BY sf.Id, sf.Caption
@@ -160,7 +162,8 @@ export async function getTopProductFamilies(
     LEFT JOIN ItemFamily f ON i.FamilyId = f.Id
     WHERE sd.DocumentDate >= @startDate
       AND sd.DocumentDate <= @endDate
-      AND sd.DocumentType IN (6, 7)
+      AND sd.DocumentType IN (2, 3)
+      AND sd.ValidationState = 3
       AND sdl.NetAmountVatExcluded > 0
       ${customerId ? 'AND sd.CustomerId = @customerId' : ''}
     GROUP BY f.Id, f.Caption
