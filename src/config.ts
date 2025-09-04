@@ -1,10 +1,16 @@
 export const config = {
-  // Base de données EBP - Configuration via .env OBLIGATOIRE
+  // Base de données EBP - Variables via Claude Desktop OU .env
   database: {
-    server: process.env.EBP_SERVER || (() => { throw new Error('EBP_SERVER manquant dans .env'); })(),
-    database: process.env.EBP_DATABASE || (() => { throw new Error('EBP_DATABASE manquant dans .env'); })(),
-    user: process.env.EBP_USER || (() => { throw new Error('EBP_USER manquant dans .env'); })(),
-    password: process.env.EBP_PASSWORD || (() => { throw new Error('EBP_PASSWORD manquant dans .env'); })(),
+    server: process.env.EBP_SERVER || 'SRVDEV2025\\EBP',
+    database: process.env.EBP_DATABASE || 'JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4',
+    // Authentification Windows si EBP_TRUSTED_CONNECTION=true, sinon SQL
+    ...(process.env.EBP_TRUSTED_CONNECTION === 'true' ? 
+      { } : // Authentification Windows (pas de user/password)
+      { 
+        user: process.env.EBP_USER || 'sa',
+        password: process.env.EBP_PASSWORD || '@ebp78EBP'
+      }
+    ),
     port: parseInt(process.env.EBP_PORT || '1433'),
     options: {
       encrypt: false,
