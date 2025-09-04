@@ -1,0 +1,40 @@
+Objet : Déploiement serveur MCP EBP en production - Informations requises
+
+Bonjour [Nom],
+
+J'espère que vous allez bien. 
+
+Je vous contacte concernant le serveur MCP EBP que nous avons développé et testé avec succès sur l'environnement de développement que vous avez mis en place (SRVDEV2025\EBP avec la base JBG METAFIX_...).
+
+Nous souhaitons maintenant déployer cette solution en production et j'aurais besoin de quelques informations pour adapter la configuration :
+
+**ENVIRONNEMENT DE PRODUCTION :**
+• Quel est le nom exact du serveur SQL de production EBP ?
+• Utilise-t-il la même structure d'instance (équivalent de \EBP) ?
+• Le nom de la base de données est-il identique à l'environnement de test ?
+• Sur quel port tourne SQL Server ? (1433 par défaut ?)
+
+**SÉCURITÉ ET ACCÈS :**
+• Faut-il créer un compte de service dédié pour cette application ou puis-je utiliser le compte 'sa' ?
+• Si compte dédié : quel format de nom respecter selon vos standards ?
+• L'authentification Windows est-elle préférable à l'authentification SQL ?
+• Y a-t-il des contraintes de sécurité particulières à respecter ?
+
+**DÉPLOIEMENT :**
+• Node.js est-il déjà installé sur le serveur de production ? (version 18+ requise)
+• Dans quel répertoire dois-je installer l'application ? (je pensais à C:\Services\EBP-MCP-Server)
+• Y a-t-il des procédures de validation ou tests spécifiques à effectuer ?
+
+**TECHNIQUE :**
+L'application fonctionne parfaitement en test avec les paramètres que vous avez configurés. Je dois simplement adapter les paramètres de connexion pour l'environnement de production dans un fichier de configuration sécurisé.
+
+Pouvez-vous me transmettre ces informations quand vous aurez un moment ? Je peux aussi passer vous voir si c'est plus pratique pour faire le point.
+
+Merci d'avance pour votre aide !
+
+Cordialement,
+[Votre nom]
+
+---
+
+P.S. : Pour rappel, cette application permet d'analyser les données EBP via des questions en langage naturel (CA, clients, familles de produits) sans risque pour les données (accès lecture seule uniquement).
