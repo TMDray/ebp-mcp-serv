@@ -81,7 +81,7 @@ Métriques:
         "EBP_SERVER": "SRVDEV2025\\EBP",
         "EBP_DATABASE": "JBG METAFIX_...",
         "EBP_USER": "sa",
-        "EBP_PASSWORD": "@ebp78EBP"
+        "EBP_PASSWORD": "VOTRE_MOT_DE_PASSE"
       }
     }
   }

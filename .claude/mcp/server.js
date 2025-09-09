@@ -27,7 +27,7 @@ const dbConfig = {
   server: process.env.EBP_SERVER || 'SRVDEV2025\\EBP',
   database: process.env.EBP_DATABASE || 'JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4',
   user: process.env.EBP_USER || 'sa',
-  password: process.env.EBP_PASSWORD || '@ebp78EBP',
+  password: process.env.EBP_PASSWORD || 'CHANGEZ_MOI',
   options: {
     encrypt: false, // Pour SQL Server local
     trustServerCertificate: true,

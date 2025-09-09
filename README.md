@@ -28,7 +28,7 @@ Variables d'environnement (optionnelles) :
 - `EBP_SERVER` : Serveur SQL (défaut: SRVDEV2025\EBP)
 - `EBP_DATABASE` : Base EBP (défaut: JBG METAFIX_...)
 - `EBP_USER` : Utilisateur SQL (défaut: sa)
-- `EBP_PASSWORD` : Mot de passe (défaut: @ebp78EBP)
+- `EBP_PASSWORD` : Mot de passe (défaut: CHANGEZ_MOI)
 
 ## Outils MCP
 

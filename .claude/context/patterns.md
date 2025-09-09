@@ -301,7 +301,7 @@ const config = {
   server: 'SRVDEV2025\\EBP',
   database: 'JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4',
   user: 'sa',
-  password: '@ebp78EBP',
+  password: 'CHANGEZ_MOI',
   options: {
     encrypt: false,
     trustServerCertificate: true
@@ -399,7 +399,7 @@ server.tool('ebp_schedule_reminder', ...);
 const connection = new sql.ConnectionPool({
   server: 'SRVDEV2025\\EBP',
   user: 'sa',
-  password: '@ebp78EBP' // ⚠️ Secret en dur!
+  password: 'CHANGEZ_MOI' // ⚠️ Secret en dur!
 });
 
 // ✅ Faire plutôt

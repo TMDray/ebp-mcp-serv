@@ -8,7 +8,7 @@ export const config = {
       { } : // Authentification Windows (pas de user/password)
       { 
         user: process.env.EBP_USER || 'sa',
-        password: process.env.EBP_PASSWORD || '@ebp78EBP'
+        password: process.env.EBP_PASSWORD || 'CHANGEZ_MOI'
       }
     ),
     port: parseInt(process.env.EBP_PORT || '1433'),

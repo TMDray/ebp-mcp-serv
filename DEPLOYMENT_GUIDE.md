@@ -27,7 +27,7 @@ npm run build
         "EBP_SERVER": "SRVDEV2025\\EBP",
         "EBP_DATABASE": "JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4",
         "EBP_USER": "sa",
-        "EBP_PASSWORD": "@ebp78EBP"
+        "EBP_PASSWORD": "VOTRE_MOT_DE_PASSE"
       }
     }
   }

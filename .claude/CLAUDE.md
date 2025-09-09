@@ -124,7 +124,7 @@ Teste la plus petite unité possible avant de construire dessus
 ```yaml
 Server: SRVDEV2025\EBP
 Database: JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4
-Auth: SQL (sa/@ebp78EBP)
+Auth: SQL (sa/VOTRE_MOT_DE_PASSE)
 Port: 1433
 État: ✅ Testé - 2332 activités accessibles
 ```
@@ -157,7 +157,7 @@ Pour tester avec Claude Desktop, ajouter dans le fichier de config :
         "EBP_SERVER": "SRVDEV2025\\EBP",
         "EBP_DATABASE": "JBG METAFIX_0895452f-b7c1-4c00-a316-c6a6d0ea4bf4",
         "EBP_USER": "sa",
-        "EBP_PASSWORD": "@ebp78EBP"
+        "EBP_PASSWORD": "VOTRE_MOT_DE_PASSE"
       }
     }
   }

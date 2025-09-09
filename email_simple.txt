@@ -1,0 +1,14 @@
+Objet : Serveur MCP EBP - Confirmation serveur production
+
+Bonjour [Nom],
+
+Pour déployer le serveur MCP EBP en production, j'aurais juste besoin d'une confirmation :
+
+Le serveur SQL de production est bien SRV2024\EBP ?
+(au lieu de SRVDEV2025\EBP pour le développement)
+
+Si c'est bien ça, j'ai tout ce qu'il me faut pour déployer.
+
+Merci !
+
+[Votre nom]
