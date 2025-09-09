@@ -15,6 +15,7 @@ import { logger } from './logger.js';
 import { getClientSales } from './tools/sales.js';
 import { getEnhancedClientActivities, getColleagueActivitiesSummary } from './tools/activities.js';
 import { getProductFamiliesPerformance, getFamiliesGrowthComparison } from './tools/families.js';
+import { searchCompanies, listCompanies } from './tools/search.js';
 
 const server = new Server(
   {
@@ -192,6 +193,53 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             }
           }
         }
+      },
+      {
+        name: 'ebp_search_companies',
+        description: 'Recherche d\'entreprises par nom (recherche floue tolérante aux fautes)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            searchTerm: {
+              type: 'string',
+              description: 'Terme de recherche (ex: "CHAUVIN", "ASB", "AEROSPATIALE")'
+            },
+            limit: {
+              type: 'number',
+              description: 'Nombre max de résultats (défaut: 20)',
+              default: 20
+            },
+            exactMatch: {
+              type: 'boolean',
+              description: 'Recherche exacte uniquement (défaut: false)',
+              default: false
+            }
+          },
+          required: ['searchTerm']
+        }
+      },
+      {
+        name: 'ebp_list_companies',
+        description: 'Liste des entreprises par ordre alphabétique avec filtres',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            startsWith: {
+              type: 'string',
+              description: 'Commençant par (ex: "A", "CH")'
+            },
+            limit: {
+              type: 'number',
+              description: 'Nombre max de résultats (défaut: 50)',
+              default: 50
+            },
+            activeOnly: {
+              type: 'boolean',
+              description: 'Seulement les clients actifs (défaut: false)',
+              default: false
+            }
+          }
+        }
       }
     ]
   };
@@ -296,6 +344,38 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             }
           ]
         };
+
+      case 'ebp_search_companies':
+        const searchResult = await searchCompanies({
+          searchTerm: args.searchTerm as string,
+          limit: args.limit as number,
+          exactMatch: args.exactMatch as boolean
+        });
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(searchResult, null, 2)
+            }
+          ]
+        };
+
+      case 'ebp_list_companies':
+        const listResult = await listCompanies({
+          startsWith: args.startsWith as string,
+          limit: args.limit as number,
+          activeOnly: args.activeOnly as boolean
+        });
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(listResult, null, 2)
+            }
+          ]
+        };
       
       default:
         throw new Error(`Outil inconnu: ${name}`);
@@ -325,7 +405,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   
-  logger.info('Serveur MCP EBP démarré avec 5 tools');
+  logger.info('Serveur MCP EBP démarré avec 7 tools');
 }
 
 // Nettoyage à la fermeture

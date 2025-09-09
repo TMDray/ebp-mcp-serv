@@ -1,5 +1,54 @@
 # Changelog EBP MCP Server
 
+## [v1.4.0] - 2025-09-08
+
+### 🔍 **Amélioration majeure - Recherche d'entreprises intelligente**
+
+#### ✨ **NOUVEAUX OUTILS MCP**
+
+1. **`ebp_search_companies`** - Recherche d'entreprises par nom
+   - **Recherche floue tolérante** : "CHAUVIN" → trouve "CHAUVIN ARNOUX"
+   - **Recherche approximative** : "ASB" → trouve "ASB - AEROSPATIALE Batteries"
+   - **Tri intelligent** : Résultats les plus courts en premier
+   - **Support fautes d'orthographe** : Flexibilité dans la saisie
+   - **Paramètres** : `searchTerm`, `limit`, `exactMatch`
+
+2. **`ebp_list_companies`** - Liste alphabétique d'entreprises  
+   - **Filtrage par lettre** : Commençant par "C", "CH", etc.
+   - **Navigation alphabétique** : Parcours ordonné de la base clients
+   - **Limite configurable** : Contrôle du nombre de résultats
+   - **Paramètres** : `startsWith`, `limit`, `activeOnly`
+
+#### 🎯 **Cas d'usage résolus**
+
+- ✅ **"CHAUVIN"** → Trouve 4 entreprises dont **CCHAUVIN : CHAUVIN ARNOUX**
+- ✅ **"ASB"** → Trouve **CAEROSPATIALE : ASB - AEROSPATIALE Batteries**  
+- ✅ **Navigation A-Z** → 276 entreprises commençant par "C"
+- ✅ **Recherche partielle** → Plus de flexibilité pour les utilisateurs
+
+#### 🔧 **Améliorations techniques**
+
+- **2 nouveaux outils MCP** ajoutés (total : **7 outils**)
+- **Requêtes SQL optimisées** pour la recherche textuelle
+- **Interface MCP enrichie** avec nouveaux schémas d'entrée
+- **Gestion d'erreurs robuste** pour les recherches vides
+
+#### 💡 **Impact utilisateur**
+
+- **Terminé la rigidité** : Plus besoin de connaître l'ID exact
+- **Recherche intuitive** : Tapez une partie du nom d'entreprise
+- **Découverte facilitée** : Exploration alphabétique possible
+- **Gain de temps** : Recherche rapide même avec fautes de frappe
+
+#### 📊 **Validation technique**
+
+- ✅ **Build réussi** avec nouveaux outils
+- ✅ **Tests fonctionnels** sur CHAUVIN, ASB, liste "C"
+- ✅ **Serveur MCP** démarre avec 7 outils
+- ✅ **Compatibilité** avec Claude Desktop
+
+---
+
 ## [v1.3.0] - 2025-09-08
 
 ### 🎯 **Corrections majeures suite au feedback client CCHAUVIN**
