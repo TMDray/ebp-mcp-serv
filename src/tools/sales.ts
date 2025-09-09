@@ -18,8 +18,14 @@ export interface ClientSalesResult {
   period: string;
   totalRevenue: number;
   totalOrders: number;
+  totalArticles?: number; // Nouveau : nombre d'articles commandés
   averageOrderValue: number;
   lastOrderDate?: Date;
+  // Nouveaux champs demandés par le client
+  appliedRate?: string; // Tarif appliqué (B, C, X, XX, Z, ZZ)
+  paymentTerms?: string; // Conditions de règlement (30j fdm, 60j, etc.)
+  shippingTerms?: string; // Conditions de port (Franco, Départ usine, etc.)
+  averageShippingCost?: number; // Coût moyen du port
   productFamilies?: ProductFamily[];
   monthlyTrend?: Array<{
     month: string;
@@ -35,26 +41,38 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
   const period = params.period || 'year';
   const { startDate, endDate, label } = calculatePeriodDates(period, params.startDate, params.endDate);
   
-  // Requête principale pour le CA
+  // Requête principale enrichie avec tous les champs demandés
   const salesResult = await pool.request()
     .input('customerId', params.customerId)
     .input('startDate', startDate)
     .input('endDate', endDate)
     .query(`
-      SELECT 
-        c.Id as CustomerId,
-        c.Name as CustomerName,
-        COUNT(DISTINCT sd.Id) as TotalOrders,
-        SUM(sd.AmountVatExcludedWithDiscount) as TotalRevenue,
-        MAX(sd.DocumentDate) as LastOrderDate
-      FROM Customer c
-      LEFT JOIN SaleDocument sd ON c.Id = sd.CustomerId
-        AND sd.DocumentDate >= @startDate 
-        AND sd.DocumentDate <= @endDate
-        AND sd.DocumentType IN (2, 3) -- Factures et Avoirs (Types corrects)
-        AND sd.ValidationState = 3 -- Seulement les documents comptabilisés
-      WHERE c.Id = @customerId
-      GROUP BY c.Id, c.Name
+      WITH SalesData AS (
+        SELECT 
+          c.Id as CustomerId,
+          c.Name as CustomerName,
+          COUNT(DISTINCT sd.Id) as TotalOrders,
+          SUM(sdl.RealNetAmountVatExcluded) as TotalRevenue,
+          COUNT(sdl.Id) as TotalArticles,
+          MAX(sd.DocumentDate) as LastOrderDate,
+          -- Agrégation des champs supplémentaires
+          MAX(sd.PriceListCategory) as AppliedRate,
+          MAX(sm.Caption) as PaymentTerms,
+          MAX(s.Caption) as ShippingTerms,
+          AVG(sd.ShippingAmountVatExcluded) as AvgShippingCost
+        FROM Customer c
+        LEFT JOIN SaleDocument sd ON c.Id = sd.CustomerId
+          AND sd.DocumentDate >= @startDate 
+          AND sd.DocumentDate <= @endDate
+          AND sd.DocumentType IN (2, 3) -- Factures et Avoirs
+          AND sd.ValidationState = 3 -- Seulement les documents comptabilisés
+        LEFT JOIN SaleDocumentLine sdl ON sd.Id = sdl.DocumentId
+        LEFT JOIN SettlementMode sm ON sd.SettlementModeId = sm.Id
+        LEFT JOIN Shipping s ON sd.ShippingId = s.Id
+        WHERE c.Id = @customerId
+        GROUP BY c.Id, c.Name
+      )
+      SELECT * FROM SalesData
     `);
   
   if (!salesResult.recordset[0]) {
@@ -68,8 +86,14 @@ export async function getClientSales(params: ClientSalesParams): Promise<ClientS
     period: label,
     totalRevenue: mainData.TotalRevenue || 0,
     totalOrders: mainData.TotalOrders || 0,
-    averageOrderValue: mainData.TotalRevenue ? Math.round((mainData.TotalRevenue / mainData.TotalOrders) * 100) / 100 : 0,
-    lastOrderDate: mainData.LastOrderDate
+    totalArticles: mainData.TotalArticles || 0, // Nouveau : nombre d'articles
+    averageOrderValue: mainData.TotalOrders > 0 ? Math.round((mainData.TotalRevenue / mainData.TotalOrders) * 100) / 100 : 0,
+    lastOrderDate: mainData.LastOrderDate,
+    // Nouveaux champs enrichis
+    appliedRate: mainData.AppliedRate || 'Non défini',
+    paymentTerms: mainData.PaymentTerms || 'Non défini',
+    shippingTerms: mainData.ShippingTerms || 'Non défini',
+    averageShippingCost: mainData.AvgShippingCost ? Math.round(mainData.AvgShippingCost * 100) / 100 : 0
   };
   
   // Ajouter les familles de produits si demandé

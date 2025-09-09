@@ -1,10 +1,10 @@
 # Serveur MCP EBP - Documentation Projet
 
 > **Projet :** Serveur MCP pour connexion Claude/Copilot Studio ↔ EBP Gestion Commerciale  
-> **Version :** 0.1.0 - MVP  
-> **Statut :** Phase 1 ✅ TERMINÉE - Prêt pour test Claude Desktop  
-> **Dernière MAJ :** 05 février 2025  
-> **Approche :** Start Simple - Approche MVP itérative
+> **Version :** 1.3.0 - Corrections majeures feedback client  
+> **Statut :** Production stable - Corrections CCHAUVIN intégrées ✅  
+> **Dernière MAJ :** 08 septembre 2025  
+> **Approche :** Feedback-driven improvements
 
 ## 🎯 Vue d'ensemble
 

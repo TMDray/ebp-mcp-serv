@@ -66,7 +66,7 @@ export async function getProductFamiliesPerformance(
       COUNT(DISTINCT sd.CustomerId) as CustomerCount,
       COUNT(DISTINCT sd.Id) as DocumentCount,
       SUM(sdl.Quantity) as TotalQuantity,
-      SUM(sdl.NetAmountVatExcluded) as TotalRevenue,
+      SUM(sdl.RealNetAmountVatExcluded) as TotalRevenue,
       AVG(sdl.NetAmountVatExcluded) as AvgLineValue
     FROM SaleDocumentLine sdl
     INNER JOIN SaleDocument sd ON sdl.DocumentId = sd.Id
@@ -76,7 +76,7 @@ export async function getProductFamiliesPerformance(
       AND sd.DocumentDate <= @endDate
       AND sd.DocumentType IN (2, 3)  -- Factures et Avoirs (Types corrects)
       AND sd.ValidationState = 3  -- Seulement les documents comptabilisés
-      AND sdl.NetAmountVatExcluded > 0
+      AND sdl.NetAmountVatExcluded <> 0  -- Inclure avoirs (négatifs) et factures (positifs)
   `;
   
   const request = pool.request()
@@ -132,7 +132,7 @@ export async function getProductFamiliesPerformance(
           SELECT TOP 3
             sd.CustomerId,
             sd.CustomerName,
-            SUM(sdl.NetAmountVatExcluded) as Revenue
+            SUM(sdl.RealNetAmountVatExcluded) as Revenue
           FROM SaleDocumentLine sdl
           INNER JOIN SaleDocument sd ON sdl.DocumentId = sd.Id
           LEFT JOIN Item i ON sdl.ItemId = i.Id
@@ -165,7 +165,7 @@ export async function getProductFamiliesPerformance(
           SELECT TOP 5
             COALESCE(sf.Id, 'SANS_SOUS_FAMILLE') as SubFamilyId,
             COALESCE(sf.Caption, 'SANS SOUS-FAMILLE') as SubFamilyName,
-            SUM(sdl.NetAmountVatExcluded) as Revenue
+            SUM(sdl.RealNetAmountVatExcluded) as Revenue
           FROM SaleDocumentLine sdl
           INNER JOIN SaleDocument sd ON sdl.DocumentId = sd.Id
           LEFT JOIN Item i ON sdl.ItemId = i.Id
@@ -175,7 +175,7 @@ export async function getProductFamiliesPerformance(
             AND sd.DocumentDate <= @endDate
             AND sd.DocumentType IN (2, 3)
             AND sd.ValidationState = 3
-            AND sdl.NetAmountVatExcluded > 0
+            AND sdl.NetAmountVatExcluded <> 0  -- Inclure avoirs (négatifs) et factures (positifs)
           GROUP BY sf.Id, sf.Caption
           ORDER BY SUM(sdl.NetAmountVatExcluded) DESC
         `);
